@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://mp3builder.com/</loc>
+    <loc>https://mp3builder.net/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://mp3builder.com/legal/terms</loc>
+    <loc>https://mp3builder.net/legal/terms</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://mp3builder.com/legal/privacy</loc>
+    <loc>https://mp3builder.net/legal/privacy</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
