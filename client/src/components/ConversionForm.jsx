@@ -14,6 +14,103 @@ function ConversionForm() {
         setError(null)
         setDownloadLink(null)
 
+        // Validate uploaded file
+
+        const original_mp3 = e.target.file.files[0]
+        
+        if (!original_mp3) {
+            setError("Please upload an MP3 file")
+            return
+        }
+
+        if (original_mp3.type !== "audio/mpeg") {
+            setError("Please upload an MP3 file")
+            return
+        }
+        
+        if (original_mp3.size > 500000000) {
+            setError("Please upload a file less than 500MB")
+            return
+        }
+
+        // Validate tags
+
+        const title = e.target.title.value
+        const artists = e.target.artists.value
+        const album = e.target.album.value
+        const track = e.target.track.value
+        const year = e.target.year.value
+        const genres = e.target.genres.value
+        const comments = e.target.comments.value
+        const album_art = e.target.album_art.files[0]
+
+        // Validate input lengths and required fields
+
+        if (title.length > 100 || artists.length > 100 || album.length > 100 || track.length > 100 || genres.length > 100 || comments.length > 100) {
+            setError("Please limit all fields to 100 characters.")
+            return
+        }
+
+        if (title.length === 0 || artists.length === 0) {
+            setError("Please fill out all required fields.")
+            return
+        }
+
+        // Validate list types
+
+        const commaRegex = /^(?:[\w\s]+)(?:,\s*[\w\s]+)*$/
+        if(genres !== "" && !commaRegex.test(genres)) {
+            setError("Genres must be comma separated.")
+            return
+        }
+
+        if(!commaRegex.test(artists)) {
+            setError("Artists must be comma separated.")
+            return
+        }
+
+        const yearRegex = /^\d{4}$/
+        if(year !== "" && !yearRegex.test(year)) {
+            setError("Please enter a valid year.")
+            return
+        }
+
+        const trackNumberRegex = /^\d+$/
+        if(track !== "" && !trackNumberRegex.test(track)) { 
+            setError("Track number must be a number.")
+            return
+        }
+
+        // Validate album art file
+        
+        if(album_art) 
+        {
+            if(album_art.type !== "image/jpeg" && album_art.type !== "image/png" && album_art.type !== "image/jpg") {
+                setError("Please upload a JPEG or PNG file.")
+                return
+            }
+    
+            if(album_art.size > 25 * 1000000) {
+                setError("Please upload album artwork files less than 25MB.")
+                return
+            }
+        }
+
+        // Process file
+
+        document.getElementById("download-btn").classList.add("d-none")
+        document.getElementById("loader").classList.remove("d-none")
+
+        const formData = new FormData()
+        formData.append("file", original_mp3)
+        formData.append("title", title)
+        formData.append("artists", artists)
+        formData.append("album", album)
+        formData.append("track", track)
+        formData.append("year", year)
+        formData.append("genres", genres)
+        formData.append("comments", comments)
+        formData.append("album_art", album_art)
         
     }
 
@@ -31,11 +128,11 @@ function ConversionForm() {
                                     <input className="form-control form-control-dark bg-dark text-light rounded-0" type="file" id="file" name="file" />
                                 </div>
                                 <div className="mb-3">
-                                    <label className="form-label">Song Title</label>
+                                    <label className="form-label">Song Title <span className="text-danger">*</span></label>
                                     <input className="form-control form-control-dark bg-dark text-light rounded-0" type="text" id="title" name="title" placeholder="Enter the song title" />
                                 </div>
                                 <div className="mb-3">
-                                    <label className="form-label">Artist(s)</label>
+                                    <label className="form-label">Artist(s) <span className="text-danger">*</span></label>
                                     <input className="form-control form-control-dark bg-dark text-light rounded-0" type="text" id="artists" name="artists" placeholder="Enter a comma separated list of artists" />
                                 </div>
                                 <div className="mb-3">
