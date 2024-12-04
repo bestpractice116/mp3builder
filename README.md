@@ -2,7 +2,7 @@
 
 <!-- !TODO: Add badges here. -->
 
-A free and open-source web app for editing MP3 tags and metadata (IDv3).
+A free and open-source web app for editing MP3 tags and metadata (ID3v2).
 
 ## Features
 
