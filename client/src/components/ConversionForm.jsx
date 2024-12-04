@@ -111,7 +111,42 @@ function ConversionForm() {
         formData.append("genres", genres)
         formData.append("comments", comments)
         formData.append("album_art", album_art)
+
+        const result = await fetch(`${import.meta.env.VITE_BASE_API_URL}/process`, {
+            method: "POST",
+            body: formData
+        })
+
+        const response = await result.json()
+
+        if(result.ok) 
+        {
+            // Update UI
+            document.getElementById("loader").classList.add("d-none")
+            document.getElementById("download-btn").classList.remove("d-none")
+            document.getElementById("conversion-form").reset()
+
+            // Fetch download link and attempt to download
+            setDownloadLink(response.download_link)
+            
+            try 
+            {
+                const file_response = await fetch(response.download_link)
+                const blob = await file_response.blob()
+                saveAs(blob, `${title} - ${artists}_mp3builder.net.mp3`)
+            } 
+            
+            catch (error) {
+                console.error("Failed to automatically download file. Please download it manually.")
+            }
+        } 
         
+        else 
+        {
+            document.getElementById("loader").classList.add("d-none")
+            document.getElementById("download-btn").classList.remove("d-none")
+            setError(response.error)
+        }
     }
 
     return (

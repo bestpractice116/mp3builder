@@ -25,7 +25,8 @@
 		"dotenv": "^16.4.7",
 		"express": "^4.21.1",
 		"express-fileupload": "^1.5.1",
-		"node-id3": "^0.2.6"
+		"node-id3": "^0.2.6",
+		"uuid": "^11.0.3"
 	},
 	"devDependencies": {
 		"nodemon": "^3.1.7"
