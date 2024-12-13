@@ -11,11 +11,10 @@ import { Upload } from '@aws-sdk/lib-storage'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import streamToBuffer from '../utils/streamToBuffer.js'
 
-// updateTags - Update MP3 tags and send download link
+// updateTags - Process MP3 file's tags and get download link
 export const updateTags = async (req, res) => 
 {
     // Validate file uploads
-
     const original_mp3 = req.files.file
     const album_art = req.files.album_art
 
@@ -38,7 +37,8 @@ export const updateTags = async (req, res) =>
     const genres = req.body.genres != "" ? req.body.genres : "Unknown"
     const comments = req.body.comments != "" ? req.body.comments : ""
 
-    try {
+    try 
+    {
         // Configure S3 Client
         const s3Client = new S3Client({
             endpoint: process.env.S3_ENDPOINT,
@@ -119,7 +119,9 @@ export const updateTags = async (req, res) =>
         const taggedMp3Buffer = nodeID3.update(id3_tags, mp3Buffer)
         
         if (!taggedMp3Buffer) {
-            throw new Error("Failed to write ID3 tags")
+            return res.status(500).json({ 
+                error: "Error - Unable to update ID3 tags."
+            })
         }
 
         // Upload tagged MP3
@@ -140,11 +142,12 @@ export const updateTags = async (req, res) =>
 
         await finalUploader.done()
 
-        // Generate download link
+        // Generate and send download link
         const downloadCommand = new GetObjectCommand({
             Bucket: process.env.S3_BUCKET,
             Key: convertedMp3Key
         })
+
         const downloadLink = await getSignedUrl(s3Client, downloadCommand, { 
             expiresIn: 2 * 60 * 60
         })
@@ -155,14 +158,14 @@ export const updateTags = async (req, res) =>
     } 
     
     catch (error) {
-        console.error(error) //!TODO: Add error logging
+        console.error(error)
         return res.status(500).json({ 
             error: "Server error. Please try again later."
         })
     }
 }
 
-// deleteFiles - CRON job - Delete files older than 2 hours
+// deleteFiles - CRON job for deleting files older than 2 hours
 export const deleteFiles = async (req, res) => {
     try 
     {
@@ -184,7 +187,7 @@ export const deleteFiles = async (req, res) => {
         const listResponse = await s3Client.send(listCommand);
 
         if (!listResponse.Contents || listResponse.Contents.length === 0) {
-            return res.status(200).json({ message: "No files to clean up." });
+            return res.status(200).json({ message: "No files in storage." });
         }
 
         const now = new Date();
@@ -197,10 +200,10 @@ export const deleteFiles = async (req, res) => {
         }).map((obj) => ({ Key: obj.Key }));
 
         if (objectsToDelete.length === 0) {
-            return res.status(200).json({ message: "No files older than 2 hours." });
+            return res.status(200).json({ message: "No files eligible for deletion." });
         }
 
-        // Delete the filtered objects
+        // Delete filtered objects
         const deleteCommand = new DeleteObjectsCommand({
             Bucket: bucketName,
             Delete: { Objects: objectsToDelete },
@@ -208,15 +211,15 @@ export const deleteFiles = async (req, res) => {
 
         await s3Client.send(deleteCommand);
 
-        return res.status(200).json({
+        return res.status(201).json({
             message: `${objectsToDelete.length} files deleted successfully.`,
         });
     } 
     
     catch (error) {
-        console.error("Cleanup Error: ", error); //!TODO: Add error logging later
+        console.error(error)
         return res.status(500).json({
-            error: "Server error during cleanup. Please try again later.",
+            error: "Error cleaning up generated files. Please try again later.",
         });
     }
 }
